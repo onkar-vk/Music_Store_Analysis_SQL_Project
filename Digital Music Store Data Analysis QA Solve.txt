@@ -1,0 +1,280 @@
+Digital Music Store Data Analysis Projects Real Problems Solved:
+
+Q.1) Who is the senior most emplyoee based on job title?
+Query:
+Select * From Employee
+Order by levels desc
+Limit 1
+
+Output: "Madan Mohan" "Senior General Manager"
+
+
+
+Q.2) Which countries have the most invoices? 
+Query:
+Select Count(*)As c, Billing_country 
+From Invoice
+Group by Billing_Country
+Order by c desc
+
+Output:
+131	"USA"
+76	"Canada"
+
+
+
+Q.3) What are the top 3 values of total invoice 
+Query:
+Select * FROM invoice
+order by total desc
+limit 3
+
+Output:
+23.759999999999998
+19.8
+19.8
+
+
+
+Q.4) Which city has the best customers? We would like to throw a promotional music festival in the city we made the most query that returns one city that has the highest sum of invoice totals. 
+Returns both city name & sum of all invoice totals 
+Query:
+Select Sum(total) as invoice_total, billing_city
+from invoice
+group by billing_city
+order by invoice_total desc
+
+Output:
+273.24000000000007   "Prague"
+169.29	                           "Mountain View"
+166.32	                           "London"
+
+
+
+Q.5) Who is best customer? The customer who money will be declared the best customer. Write a query that returns the person who has spent the most money.
+Query:
+select customer.customer_id, customer.first_name, customer.last_name, 
+Sum(invoice.total) as total
+from Customer
+Join invoice ON customer.customer_id= invoice.customer_id
+Group By customer.customer_id
+Order By total DESC
+limit 1
+
+Output:
+"R Madhav"	144.54000000000002
+
+
+
+Q.6) Write query to return the email, first name, last name, & Genre of all Rock Music listeners. Return your list ordered alphabetically by email starting with A
+
+Query:
+SELECT DISTINCT email,first_name,last_name
+From customer
+Join invoice ON  customer.customer_id = invoice.customer_id
+Join invoice_line ON invoice.invoice_id = invoice_line.invoice_id
+WHERE track_id In(
+	Select track_id From track
+	Join genre ON track.genre_id=genre.genre_id
+	Where genre.name Like 'Rock'
+)
+Order By email;
+
+Output:
+aaronmitchell@yahoo.ca	Aaron                                             	Mitchell                                          
+alero@uol.com.br	Alexandre                                         	Rocha                                             
+astrid.gruber@apple.at	Astrid                                            	Gruber                                            
+bjorn.hOutputen@yahoo.no	Bjørn                                             	HOutputen                                            
+camille.bernard@yahoo.fr	Camille                                           	Bernard                                           
+daan_peeters@apple.be	Daan                                              	Peeters                                           
+diego.gutierrez@yahoo.ar	Diego                                             	Gutiérrez                                         
+dmiller@comcast.com	Dan                                               	Miller                                            
+
+
+
+Q.7) Lets invite the artist who have written the most rock music in our dataset. Write a query that returns the Artist name and total track count of top 10 rock bands
+
+Query: 
+Select artist.artist_id, artist.name, Count (artist.artist_id) as number_of_songs
+From track
+Join album ON album.album_id = track.album_id
+Join artist ON artist.artist_id = album.artist_id
+Join genre ON genre.genre_id= track.genre_id
+Where genre.name Like 'Rock'
+Group By artist.artist_id
+Order by number_of_songs Desc
+Limit 10;
+
+Output:
+Band Name                                                               Songs
+Led Zeppelin	114	
+U2	112	
+Deep Purple	92	
+Iron Maiden	81	
+Pearl Jam	54	
+Van Halen	52	
+Queen	45	
+The Rolling Stones	41	
+Creedence Clearwater Revival	40	
+Kiss	35	
+
+
+
+Q.8) Return all the track names that have a song length longer than the average song length. Return the Name and Milliseconds for each track. Order by the song length with the longest songs listed 
+first.	
+
+Query:
+select name,milliseconds
+From track
+Where milliseconds >(
+	Select AVG (milliseconds)As avg_track_length
+	From track)
+Order by milliseconds desc;
+
+Output:
+Occupation / Precipice	5286953
+Through a Looking Glass	5088838
+Greetings from Earth, Pt. 1	2960293
+The Man With Nine Lives	2956998
+Battlestar Galactica, Pt. 2	2956081
+Battlestar Galactica, Pt. 1	2952702
+Murder On the Rising Star	2935894
+Battlestar Galactica, Pt. 3	2927802
+Take the Celestra	2927677
+Fire In Space	2926593
+
+
+
+Q.9) Find how much amount spent by each customer on artist? Write a query to return customer name, artist name and total spent
+
+Query: 
+WITH best_selling_artist as(
+Select artist.artist_id As artist_id, artist.name As artist_name,
+SUM (invoice_line.unit_price*invoice_line.quantity) as total_sales
+	From invoice_line
+	Join track ON track.track_id= invoice_line.track_id
+	Join album On album.album_id= track.album_id
+	Join artist On artist.artist_id=album.artist_id
+	Group By 1
+	Order By 3 desc
+	Limit 1
+)
+Select c.customer_id, c.first_name,c.last_name, bsa.artist_name,
+Sum (il.unit_price*il.quantity) As amount_spent
+From invoice i 
+Join customer c On c.customer_id = i.customer_id
+Join invoice_line il On il.invoice_id = i.invoice_id
+Join track t ON t.track_id = il.track_id
+JOIN album alb ON alb.album_id = t.album_id
+Join best_selling_artist bsa ON bsa.artist_id = alb.artist_id
+Group By 1,2,3,4
+Order By 5 DESC;
+
+
+Output:
+Hugh                                              	O'Reilly                                          	Queen	27.72
+Niklas                                            	Schröder                                          	Queen	18.81
+François                                          	Tremblay                                          	Queen	17.82
+João                                              	Fernandes                                         	Queen	16.83
+Phil                                              	Hughes                                            	Queen	11.88
+Marc                                              	Dubois                                            	Queen	11.88
+Lucas                                             	Mancini                                           	Queen	10.89
+Ellie                                             	Sullivan                                          	Queen	10.89
+Dan                                               	Miller                                            	Queen	3.96
+R                                                 	Madhav                                            	Queen	3.96
+John                                              	Gordon                                            	Queen	2.97
+Steve                                             	Murray                                            	Queen	2.97
+Martha                                            	Silk                                              	Queen	2.97
+Frank                                             	Harris                                            	Queen	1.98
+Jack                                              	Smith                                             	Queen	1.98
+Frank                                             	Ralston                                           	Queen	1.98
+Edward                                            	Francis                                           	Queen	1.98
+Madalena                                          	Sampaio                                           	Queen	1.98
+
+
+
+
+Q.10) We want to find out the most popular music Genre for each country. We determine the most popular genre as the genre with the highest amount of purchase. Write a query that returns each country along with the top Genre. For Countries where the maximum number of purchases is shared return all Genres. 
+
+Query:
+With popular_genre AS(
+	Select Count(invoice_line.quantity) AS purchases, customer.country,genre.name, genre.genre_id,
+	Row_Number() Over(partition by customer.country Order By Count(invoice_line.quantity) DESC) as RowNo
+	From invoice_line
+	Join invoice ON invoice.invoice_id = invoice_line.invoice_id
+	Join customer ON customer.customer_id = invoice.customer_id
+	Join track ON track.track_id = invoice_line.track_id
+	Join genre ON genre.genre_id = track.genre_id
+	group BY 2,3,4
+	Order By 2 ASC, 1 DESC
+)
+Select * From Popular_genre Where RowNo<=1
+
+Output:
+17	Argentina	Alternative & Punk	4	1
+34	Australia	Rock	1	1
+40	Austria	Rock	1	1
+26	Belgium	Rock	1	1
+205	Brazil	Rock	1	1
+333	Canada	Rock	1	1
+61	Chile	Rock	1	1
+143	Czech Republic	Rock	1	1
+24	Denmark	Rock	1	1
+46	Finland	Rock	1	1
+211	France	Rock	1	1
+194	Germany	Rock	1	1
+44	Hungary	Rock	1	1
+102	India	Rock	1	1
+72	Ireland	Rock	1	1
+35	Italy	Rock	1	1
+33	Netherlands	Rock	1	1
+40	Norway	Rock	1	1
+40	Poland	Rock	1	1
+108	Portugal	Rock	1	1
+46	Spain	Rock	1	1
+60	Sweden	Rock	1	1
+166	United Kingdom	Rock	1	1
+561	USA	Rock	1	1
+
+
+
+Q11) Write a query that determines the customer that has spent the most on music for each country. Write a query that returns the country along With the top customer and how much they spent. For countries where the top amount spent is shared, provide all customers who spent this amount.?
+Query:
+
+With Customer_with_country As (
+Select customer.customer_id, First_name, Last_name, billing_country, SUM (total) As total_spending,
+Row_Number() Over(partition by billing_country Order By Sum(total)desc) As RowNo
+	From invoice
+	Join customer on customer.customer_id = invoice.customer_id
+	GROUP by 1,2,3,4
+	ORDER by 4 asc, 5 DESC)
+SELECT * From customer_with_country Where RowNo <= 1
+
+
+Output:
+Diego                                             	Gutiérrez                                         	Argentina	39.6
+Mark                                              	Taylor                                            	Australia	81.18
+Astrid                                            	Gruber                                            	Austria	69.3
+Daan                                              	Peeters                                           	Belgium	60.39
+Luís                                              	Gonçalves                                         	Brazil	108.9
+François                                          	Tremblay                                          	Canada	99.99
+Luis                                              	Rojas                                             	Chile	97.02
+R                                                 	Madhav                                            	Czech Republic	144.54
+Kara                                              	Nielsen                                           	Denmark	37.62
+Terhi                                             	Hämäläinen                                        	Finland	79.2
+Wyatt                                             	Girard                                            	France	99.99
+Fynn                                              	Zimmermann                                        	Germany	94.05
+Ladislav                                          	Kovács                                            	Hungary	78.21
+Manoj                                             	Pareek                                            	India	111.87
+Hugh                                              	O'Reilly                                          	Ireland	114.84
+Lucas                                             	Mancini                                           	Italy	50.49
+Johannes                                          	Van der Berg                                      	Netherlands	65.34
+Bjørn                                             	HOutputen                                            	Norway	72.27
+Stanisław                                         	Wójcik                                            	Poland	76.23
+João                                              	Fernandes                                         	Portugal	102.96
+Enrique                                           	Muñoz                                             	Spain	98.01
+Joakim                                            	JohOutputson                                         	Sweden	75.24
+Phil                                              	Hughes                                            	United Kingdom	98.01
+Jack                                              	Smith                                             	USA	98.01
+
+
